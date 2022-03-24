@@ -1,1 +1,1 @@
-.strip()
+user_in

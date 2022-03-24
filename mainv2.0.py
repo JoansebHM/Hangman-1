@@ -1,68 +1,125 @@
 import os
 import random
 
+
 def word_search():
     word_list = []
-    with open ("./Files/data.txt", "r", encoding="utf-8") as f:
+    with open("./Files/data.txt", "r", encoding="utf-8") as f:
         for line in f:
             word_list.append(line.strip())
     f.close()
     word = random.choice(word_list).upper()
-    print(word)
+    normalized_word = normalize(word)
+
+    return word, normalized_word
+
+
+def print_blanks(blanks):
+    for i in blanks:
+        print(i, end=" ")
+
+
+def prompts(aux, user_in):
+    if aux == 1:
+        print(f"Good job {user_in} is part of the word")
+        aux = 0
+
+    elif aux == 2:
+        print("You already guessed that letter.")
+        aux = 0
+
+    elif aux == 3:
+        print(f"{user_in} is not on the word.")
+        aux = 0
+    else:
+        pass
+
+
+def normalize(word):
+    replacements = (
+        ("á", "a"),
+        ("é", "e"),
+        ("í", "i"),
+        ("ó", "o"),
+        ("ú", "u"),
+    )
+    for a, b in replacements:
+        word = word.replace(a, b).replace(a.upper(), b.upper())
     return word
 
-def play(word):
-    correct_words = []
+
+def play(word, normalized_word):
+    aux = 0
+    user_in = ""
+    guessed_words = []
     correct_letters = []
+    guessed_letters = []
     game_status = False
     lives = 6
-
     blanks = "_" * len(word)
 
     while game_status != True and lives > 0:
-        print("")
+        os.system('cls')
+
+        prompts(aux, user_in)
+
         print(hangman_stages(lives))
-        for user_in in blanks:
-            print(user_in, end=" ")
-        print("")
-        print(word)
-        
+        print_blanks(blanks)
+        print("\n")
+
+        print(f"The word has {len(word)} letters")
+        print("Your letters:", guessed_letters)
+        print("Your words:", guessed_words)
         print(f"Your lives {lives}")
         print("")
+
         user_in = input("Guess a letter or word: ").upper()
+
         if len(user_in) == 1 and user_in.isalpha:
-            if user_in in correct_letters:
-                print("You already guessed that letter.") 
-            elif user_in not in word:
-                print(f"'{user_in}' is not part of the word.")
+            if user_in in correct_letters or user_in in guessed_letters:
+                aux = 2
+
+            elif user_in not in normalized_word:
+                guessed_letters.append(user_in)
                 lives -= 1
+                aux = 3
+
             else:
                 correct_letters.append(user_in)
-                print(correct_letters)
-                print("Well done! You guessed a letter.")
+                guessed_letters.append(user_in)
+                aux = 1
+
                 for i in range(len(word)):
-                    if word[i] in correct_letters:
+                    if normalized_word[i] in correct_letters:
                         blanks = blanks[:i] + word[i] + blanks[i+1:]
-                if set(word) == set(correct_letters):
+
+                if set(normalized_word) == set(correct_letters):
                     game_status = True
-                    #os.system('cls')
-                    #win(word)
+                    os.system('cls')
+                    win(word)
+
         elif len(user_in) == len(word) and user_in.isalpha:
-            if user_in == word:
+            if user_in == normalized_word:
                 game_status = True
                 os.system('cls')
                 win(word)
             else:
-                print(f"{user_in} is not the word.")
-                lives -=1
+                guessed_words.append(user_in)
+                lives -= 1
         else:
             print("Invalid input.")
+            print("")
 
+    if lives == 0:
+        os.system('cls')
+        gameover(word)
 
-    return lives
+    return lives, blanks, aux, user_in
+
 
 def welcome():
-    print("""
+    os.system('cls')
+    print(f"""
                         * By Jotaherra *
 -----------------------------------------------------------------
  _                                                   _______
@@ -79,8 +136,10 @@ def welcome():
     input("Press Enter to continue...")
     os.system('cls')
 
-def gameover():
-    print(""" 
+
+def gameover(word):
+    print(f""" 
+                       * The word was: {word} *
 -----------------------------------------------------------------
                     _____                          
                    / ____|                         
@@ -96,6 +155,7 @@ def gameover():
 -----------------------------------------------------------------                                         
 """)
 
+
 def win(word):
     print(f"""
                    * The word was: {word} *
@@ -110,9 +170,10 @@ def win(word):
 -----------------------------------------------------------------
 """)
 
+
 def hangman_stages(lives):
     stages = [  # final state: head, torso, both arms, and both legs
-"""
+        """
 --------
 |      |
 |      O
@@ -121,8 +182,8 @@ def hangman_stages(lives):
 |     / \\
 -
 """,
-# head, torso, both arms, and one leg
-"""
+        # head, torso, both arms, and one leg
+        """
 --------
 |      |
 |      O
@@ -131,8 +192,8 @@ def hangman_stages(lives):
 |     / 
 -
 """,
-# head, torso, and both arms
-"""
+        # head, torso, and both arms
+        """
 --------
 |      |
 |      O
@@ -141,8 +202,8 @@ def hangman_stages(lives):
 |      
 -
 """,
-# head, torso, and one arm
-"""
+        # head, torso, and one arm
+        """
 --------
 |      |
 |      O
@@ -151,8 +212,8 @@ def hangman_stages(lives):
 |     
 -
 """,
-# head and torso
-"""
+        # head and torso
+        """
 --------
 |      |
 |      O
@@ -161,8 +222,8 @@ def hangman_stages(lives):
 |     
 -
 """,
-# head
-"""
+        # head
+        """
 --------
 |      |
 |      O
@@ -171,8 +232,8 @@ def hangman_stages(lives):
 |     
 -
 """,
-# initial empty state
-"""
+        # initial empty state
+        """
 --------
 |      |
 |      
@@ -184,10 +245,12 @@ def hangman_stages(lives):
     ]
     return stages[lives]
 
+
 def run():
     welcome()
-    word = word_search()
-    play(word)
+    word, normalized_word = word_search()
+    play(word, normalized_word)
+
 
 if __name__ == '__main__':
     run()
