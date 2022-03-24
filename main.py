@@ -31,8 +31,9 @@ def prompts(aux, user_in):
     elif aux == 3:
         print(f"{user_in} is not on the word.")
         aux = 0
-    else:
-        pass
+
+    elif aux == 4:
+        print("Invalid input.")
 
 
 def normalize(word):
@@ -49,20 +50,35 @@ def normalize(word):
 
 
 def play(word, normalized_word):
+    hint = random.choice(word)
+    hint2 = random.choice(word)
+
+    while hint == hint2:
+        hint2 = random.choice(word)
+    
     aux = 0
     user_in = ""
     guessed_words = []
-    correct_letters = []
-    guessed_letters = []
+    correct_letters = [hint]
+    guessed_letters = [hint]
+
     game_status = False
     lives = 6
     blanks = "_" * len(word)
+
+    if len(word) > 5:
+        correct_letters.append(hint2)
+        guessed_letters.append(hint2)
+
+    for i in range(len(word)):
+        if normalized_word[i] in correct_letters:
+         blanks = blanks[:i] + word[i] + blanks[i+1:]
+
 
     while game_status != True and lives > 0:
         os.system('cls')
 
         prompts(aux, user_in)
-
         print(hangman_stages(lives))
         print_blanks(blanks)
         print("\n")
@@ -107,12 +123,11 @@ def play(word, normalized_word):
                 guessed_words.append(user_in)
                 lives -= 1
         else:
-            print("Invalid input.")
-            print("")
+            aux = 4
 
-    if lives == 0:
-        os.system('cls')
-        gameover(word)
+        if lives == 0:
+            os.system('cls')
+            gameover(word)
 
     return lives, blanks, aux, user_in
 
@@ -250,6 +265,11 @@ def run():
     welcome()
     word, normalized_word = word_search()
     play(word, normalized_word)
+
+    while input("Do you want to play again? (Y/N)").upper() == "Y":
+        word, normalized_word = word_search()
+        play(word, normalized_word)
+
 
 
 if __name__ == '__main__':
