@@ -83,7 +83,7 @@ def play(word, normalized_word):
         print_blanks(blanks)
         print("\n")
 
-        print(f"The word has {len(word)} letters")
+        print(f"The word has {len(word)} Characters")
         print("Your letters:", guessed_letters)
         print("Your words:", guessed_words)
         print(f"Your lives {lives}")
