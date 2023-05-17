@@ -25,7 +25,7 @@ def prompts(aux, user_in):
         aux = 0
 
     elif aux == 2:
-        print("You already guessed that letter.")
+        print("You already guessed that one.")
         aux = 0
 
     elif aux == 3:
