@@ -37,6 +37,7 @@ def prompts(aux, user_in):
 
 
 def normalize(word):
+    #Replace characters with accent mark to non accent mark characters
     replacements = (
         ("á", "a"),
         ("é", "e"),
